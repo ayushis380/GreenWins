@@ -1,0 +1,25 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  padding-bottom: calc(70px + var(--spacing-md));
+}
+
+@media (min-width: 768px) {
+  .app {
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    min-height: calc(100vh - var(--spacing-xl) * 2);
+  }
+}
