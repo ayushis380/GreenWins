@@ -11,7 +11,13 @@ function WinCard({ card }) {
 
   const weeklyWins = getWinsForWeek(card.id)
   const weeklyCount = weeklyWins.length
-  const weeklyCO2 = weeklyWins.reduce((sum, win) => sum + (win.metrics?.co2Saved || 0), 0)
+
+  const weeklyMetrics = weeklyWins.reduce((acc, win) => ({
+    co2Saved: acc.co2Saved + (win.metrics?.co2Saved || 0),
+    waterSaved: acc.waterSaved + (win.metrics?.waterSaved || 0),
+    energySaved: acc.energySaved + (win.metrics?.energySaved || 0),
+    moneySaved: acc.moneySaved + (win.metrics?.moneySaved || 0)
+  }), { co2Saved: 0, waterSaved: 0, energySaved: 0, moneySaved: 0 })
 
   const handleStampClick = (day) => {
     if (!hasWinForDay(card.id, day.date)) {
@@ -24,6 +30,9 @@ function WinCard({ card }) {
   }
 
   const categoryColor = categoryColors[card.category] || 'var(--color-primary)'
+
+  const hasAnyImpact = weeklyMetrics.co2Saved > 0 || weeklyMetrics.waterSaved > 0 ||
+                        weeklyMetrics.energySaved > 0 || weeklyMetrics.moneySaved > 0
 
   return (
     <>
@@ -52,10 +61,24 @@ function WinCard({ card }) {
 
         <div className="card-footer">
           <span className="weekly-count">{weeklyCount}/7 this week</span>
-          {weeklyCO2 > 0 && (
-            <span className="weekly-impact">{weeklyCO2.toFixed(1)}kg CO₂ saved</span>
-          )}
         </div>
+
+        {hasAnyImpact && (
+          <div className="card-impact">
+            {weeklyMetrics.co2Saved > 0 && (
+              <span className="impact-item">🌍 {weeklyMetrics.co2Saved.toFixed(1)}kg CO₂</span>
+            )}
+            {weeklyMetrics.waterSaved > 0 && (
+              <span className="impact-item">💧 {weeklyMetrics.waterSaved.toFixed(0)}L</span>
+            )}
+            {weeklyMetrics.energySaved > 0 && (
+              <span className="impact-item">⚡ {weeklyMetrics.energySaved.toFixed(1)}kWh</span>
+            )}
+            {weeklyMetrics.moneySaved > 0 && (
+              <span className="impact-item">💰 ${weeklyMetrics.moneySaved.toFixed(2)}</span>
+            )}
+          </div>
+        )}
       </div>
 
       {selectedDay && (

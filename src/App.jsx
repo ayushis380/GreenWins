@@ -1,20 +1,18 @@
 import { useState } from 'react'
 import Header from './components/layout/Header'
-import TabBar from './components/layout/TabBar'
 import WinCardGrid from './components/cards/WinCardGrid'
 import ChatWindow from './components/chat/ChatWindow'
 import './App.css'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('cards')
+  const [activeView, setActiveView] = useState('cards')
 
   return (
     <div className="app">
-      <Header />
+      <Header activeView={activeView} onViewChange={setActiveView} />
       <main className="main-content">
-        {activeTab === 'cards' ? <WinCardGrid /> : <ChatWindow />}
+        {activeView === 'cards' ? <WinCardGrid /> : <ChatWindow />}
       </main>
-      <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   )
 }

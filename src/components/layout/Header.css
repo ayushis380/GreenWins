@@ -2,48 +2,128 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-xl);
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   color: white;
+  box-shadow: var(--shadow-md);
 }
 
-.header-title {
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xl);
+}
+
+.header-brand {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
 }
 
 .header-icon {
-  font-size: 1.5rem;
+  font-size: 2rem;
 }
 
-.header-title h1 {
-  font-size: 1.25rem;
-  font-weight: 600;
+.header-brand h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.header-nav {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.nav-button.active {
+  background: white;
+  color: var(--color-primary-dark);
+  border-color: white;
 }
 
 .header-stats {
   display: flex;
+  align-items: center;
   gap: var(--spacing-md);
 }
 
 .stat {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: var(--spacing-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-md);
-  min-width: 50px;
+}
+
+.stat-icon {
+  font-size: 1.25rem;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
 }
 
 .stat-value {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .stat-label {
   font-size: 0.65rem;
-  opacity: 0.9;
+  opacity: 0.85;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.3);
+  margin: 0 var(--spacing-xs);
+}
+
+@media (max-width: 1200px) {
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+
+  .header-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .header-stats {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .stat-divider {
+    display: none;
+  }
 }
