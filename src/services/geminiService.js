@@ -1,44 +1,24 @@
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
-class GeminiService {
+const MODEL_NAME = 'gemini-2.5-flash-lite'
+
+class GeminiAgent {
   constructor() {
     this.apiKey = import.meta.env.VITE_GEMINI_API_KEY
+    this.client = null
+    this.model = null
+    this.chatSession = null
   }
 
-  isConfigured() {
-    return Boolean(this.apiKey && this.apiKey !== 'your_gemini_api_key_here')
-  }
-
-  async generateContent(prompt, systemPrompt = null) {
+  initialize() {
     if (!this.isConfigured()) {
-      throw new Error('Gemini API key not configured. Please add VITE_GEMINI_API_KEY to your .env file.')
+      return false
     }
 
-    const contents = []
-
-    if (systemPrompt) {
-      contents.push({
-        role: 'user',
-        parts: [{ text: systemPrompt }]
-      })
-      contents.push({
-        role: 'model',
-        parts: [{ text: 'Understood. I will follow these instructions.' }]
-      })
-    }
-
-    contents.push({
-      role: 'user',
-      parts: [{ text: prompt }]
-    })
-
-    const response = await fetch(`${API_URL}?key=${this.apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents,
+    if (!this.client) {
+      this.client = new GoogleGenerativeAI(this.apiKey)
+      this.model = this.client.getGenerativeModel({
+        model: MODEL_NAME,
         generationConfig: {
           temperature: 0.7,
           topK: 40,
@@ -46,77 +26,115 @@ class GeminiService {
           maxOutputTokens: 1024
         }
       })
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error?.message || 'Failed to generate content')
     }
-
-    const data = await response.json()
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text
-
-    if (!text) {
-      throw new Error('No response generated')
-    }
-
-    return text
+    return true
   }
 
-  async chat(messages, systemPrompt) {
-    if (!this.isConfigured()) {
+  isConfigured() {
+    return Boolean(this.apiKey && this.apiKey !== 'your_gemini_api_key_here')
+  }
+
+  async generateContent(prompt, systemPrompt = null) {
+    if (!this.initialize()) {
       throw new Error('Gemini API key not configured. Please add VITE_GEMINI_API_KEY to your .env file.')
     }
 
-    const contents = []
+    try {
+      let fullPrompt = prompt
+      if (systemPrompt) {
+        fullPrompt = `${systemPrompt}\n\n---\n\nUser Request:\n${prompt}`
+      }
 
-    if (systemPrompt) {
-      contents.push({
-        role: 'user',
-        parts: [{ text: systemPrompt }]
-      })
-      contents.push({
-        role: 'model',
-        parts: [{ text: 'Understood. I am GreenBot, ready to help with sustainability!' }]
-      })
+      const result = await this.model.generateContent(fullPrompt)
+      const response = result.response
+      const text = response.text()
+
+      if (!text) {
+        throw new Error('No response generated')
+      }
+
+      return text
+    } catch (error) {
+      console.error('Gemini generateContent error:', error)
+      throw new Error(error.message || 'Failed to generate content')
+    }
+  }
+
+  async startChat(systemPrompt) {
+    if (!this.initialize()) {
+      throw new Error('Gemini API key not configured. Please add VITE_GEMINI_API_KEY to your .env file.')
     }
 
-    for (const msg of messages) {
-      contents.push({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.content }]
-      })
-    }
-
-    const response = await fetch(`${API_URL}?key=${this.apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents,
-        generationConfig: {
-          temperature: 0.8,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024
+    this.chatSession = this.model.startChat({
+      history: [
+        {
+          role: 'user',
+          parts: [{ text: systemPrompt }]
+        },
+        {
+          role: 'model',
+          parts: [{ text: 'Understood! I am GreenBot, your sustainability assistant. I\'m ready to help you with eco-friendly tips, track your environmental impact, and suggest ways to live more sustainably. How can I help you today?' }]
         }
-      })
+      ],
+      generationConfig: {
+        temperature: 0.8,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 1024
+      }
     })
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error?.message || 'Failed to generate response')
+    return this.chatSession
+  }
+
+  async chat(messages, systemPrompt) {
+    if (!this.initialize()) {
+      throw new Error('Gemini API key not configured. Please add VITE_GEMINI_API_KEY to your .env file.')
     }
 
-    const data = await response.json()
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text
+    try {
+      // Build history from messages
+      const history = []
 
-    if (!text) {
-      throw new Error('No response generated')
+      // Add system prompt as first exchange
+      if (systemPrompt) {
+        history.push({
+          role: 'user',
+          parts: [{ text: systemPrompt }]
+        })
+        history.push({
+          role: 'model',
+          parts: [{ text: 'Understood! I am GreenBot, your sustainability assistant ready to help!' }]
+        })
+      }
+
+      // Add previous messages (except the last one which we'll send)
+      for (let i = 0; i < messages.length - 1; i++) {
+        const msg = messages[i]
+        history.push({
+          role: msg.role === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.content }]
+        })
+      }
+
+      // Start chat with history
+      const chat = this.model.startChat({ history })
+
+      // Send the last message
+      const lastMessage = messages[messages.length - 1]
+      const result = await chat.sendMessage(lastMessage.content)
+      const response = result.response
+      const text = response.text()
+
+      if (!text) {
+        throw new Error('No response generated')
+      }
+
+      return text
+    } catch (error) {
+      console.error('Gemini chat error:', error)
+      throw new Error(error.message || 'Failed to generate response')
     }
-
-    return text
   }
 
   parseJSONResponse(text) {
@@ -134,5 +152,6 @@ class GeminiService {
   }
 }
 
-export const geminiService = new GeminiService()
+// Export singleton instance
+export const geminiService = new GeminiAgent()
 export default geminiService
