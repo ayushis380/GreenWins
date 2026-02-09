@@ -3,7 +3,6 @@ import {
   runOpikEvaluation,
   buildDatasetItems,
   SustainabilityDatasetItem,
-  TaskOutput,
 } from '@/lib/opik/evaluation';
 
 /**
@@ -20,7 +19,14 @@ export async function POST(request: NextRequest) {
     // Define the analyze function that calls our Gemini API
     const analyzeFunction = async (
       input: SustainabilityDatasetItem['input']
-    ): Promise<TaskOutput['output']> => {
+    ): Promise<{
+      co2Kg: number;
+      waterLiters: number;
+      energyKwh: number;
+      treesEquivalent: number;
+      confidence: number;
+      methodology: string;
+    }> => {
       const response = await fetch(
         new URL('/api/gemini/analyze-stamp', request.url).toString(),
         {
