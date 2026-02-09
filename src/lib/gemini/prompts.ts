@@ -137,3 +137,59 @@ GUIDELINES:
 - Make the comparison relatable and easy to visualize
 - Keep tips actionable and specific
 `;
+
+export interface CustomActionAnalysisContext {
+  actionName?: string;
+  description: string;
+  category?: string;
+}
+
+export const CUSTOM_ACTION_ANALYSIS_PROMPT = (context: CustomActionAnalysisContext) => `
+You are an environmental impact analyst for a sustainability tracking app called GreenWins. A user is creating a custom sustainability action and needs you to analyze it.
+
+USER INPUT:
+- Action Name: ${context.actionName || '(not provided - you must generate one)'}
+- Description: "${context.description}"
+- Preferred Category: ${context.category || '(not specified - you must suggest one)'}
+
+TASK:
+Analyze the described sustainability action and provide:
+1. An action name (if not provided by the user, generate a concise, descriptive name)
+2. The best-fit category from: transport, food, energy, water, waste, other
+3. An appropriate emoji icon for this action
+4. A full sustainability analysis
+5. Calculated impact metrics based on the description
+
+Respond with ONLY a valid JSON object (no markdown, no code blocks, no additional text):
+{
+  "actionName": "A concise name for the action (use user's name if provided, otherwise generate one)",
+  "category": "transport|food|energy|water|waste|other",
+  "icon": "single emoji that best represents this action",
+  "analysis": {
+    "aiInsight": "A personalized 2-3 sentence insight about this action and its environmental impact. Be encouraging and specific.",
+    "sustainabilityScore": <number 1-10 based on the environmental significance>,
+    "comparisonSummary": "A relatable comparison, e.g., 'This is like taking X cars off the road for a day'",
+    "environmentalBenefit": "One sentence describing the primary environmental benefit",
+    "improvementTips": ["1-2 short tips to maximize the impact of this action"]
+  },
+  "impactMetrics": {
+    "co2Kg": <estimated kg of CO2 saved per occurrence>,
+    "waterLiters": <estimated liters of water saved per occurrence>,
+    "energyKwh": <estimated kWh of energy saved per occurrence>,
+    "treesEquivalent": <fraction of a tree's annual CO2 absorption equivalent>
+  },
+  "confidence": <0.0-1.0 indicating confidence in these estimates>,
+  "methodology": "Brief explanation of how you calculated the impact metrics"
+}
+
+GUIDELINES:
+- Calculate impact metrics from scratch based on the description using EPA, DOE, and scientific data
+- Be realistic with numbers - don't overestimate impact
+- treesEquivalent should be calculated as co2Kg / 21.77 (avg tree absorbs 21.77 kg CO2/year)
+- If the description is vague, use conservative estimates and lower confidence
+- Choose the most specific category that fits
+- Pick an emoji that clearly represents the action
+- Be positive and encouraging in your insights
+- Make comparisons relatable and easy to visualize
+- Keep tips actionable and specific
+`;

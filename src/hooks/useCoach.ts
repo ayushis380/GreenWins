@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { CoachNudge, CoachInsight } from '@/types';
 import { runCoachAgent } from '@/lib/coach';
@@ -27,14 +27,20 @@ export function useCoach() {
   const { winCards, actions } = useWinCards();
   const [isRunning, setIsRunning] = useState(false);
 
+  // Use refs to avoid stale closures without causing re-renders
+  const winCardsRef = useRef(winCards);
+  const actionsRef = useRef(actions);
+  winCardsRef.current = winCards;
+  actionsRef.current = actions;
+
   // Run the coach agent
   const runCoach = useCallback(() => {
-    if (winCards.length === 0) return;
+    if (winCardsRef.current.length === 0) return;
 
     setIsRunning(true);
 
     try {
-      const result = runCoachAgent(winCards, actions);
+      const result = runCoachAgent(winCardsRef.current, actionsRef.current);
 
       setState((prev) => ({
         ...prev,
@@ -47,7 +53,7 @@ export function useCoach() {
     } finally {
       setIsRunning(false);
     }
-  }, [winCards, actions, setState]);
+  }, [setState]);
 
   // Auto-run coach when cards change (debounced)
   useEffect(() => {

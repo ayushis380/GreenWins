@@ -31,13 +31,30 @@ export async function POST(request: NextRequest) {
     const model = getChatModel();
     const systemPrompt = SUSTAINABILITY_ADVISOR_PROMPT(context);
 
+    // Create a summarized context for tracing (more readable than raw data)
+    const tracingContext = {
+      message,
+      userSummary: {
+        activeActions: context.actions.length,
+        actionNames: context.actions.map(a => a.name).slice(0, 5), // First 5 action names
+        weeklyCompletions: context.weeklyCompletions,
+        currentStreak: context.currentStreak,
+        level: context.level,
+        totalImpact: {
+          co2Kg: context.totalCO2,
+          waterLiters: context.totalWater,
+          energyKwh: context.totalEnergy,
+        },
+      },
+    };
+
     // Trace the Gemini call with Opik
     const { result, traceId: opikTraceId, latencyMs } = await traceGeminiCall(
       'GreenGuide Chat',
       {
         endpoint: 'chat',
         model: 'gemini-2.5-flash-lite',
-        input: { message, userContext: context },
+        input: tracingContext,
       },
       async () => {
         // Use startChat for conversation context

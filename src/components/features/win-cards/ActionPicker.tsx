@@ -192,11 +192,25 @@ export function ActionPicker({
                 </div>
               </>
             ) : (
-              /* Custom Action Form */
+              /* Custom Action Form - Simple version */
               <div className="flex-1 overflow-y-auto p-5 space-y-5">
+                {/* Action Name Input */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Action Name <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={customAction.name}
+                    onChange={(e) => setCustomAction({ ...customAction, name: e.target.value })}
+                    placeholder="e.g., Walked to Work, Composted Scraps"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  />
+                </div>
+
                 {/* Icon Picker */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Icon</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Choose an Icon</label>
                   <div className="flex flex-wrap gap-2">
                     {ACTION_ICONS.map((icon) => (
                       <motion.button
@@ -215,96 +229,6 @@ export function ActionPicker({
                         {icon}
                       </motion.button>
                     ))}
-                  </div>
-                </div>
-
-                {/* Name Input */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Action Name</label>
-                  <input
-                    type="text"
-                    value={customAction.name}
-                    onChange={(e) => setCustomAction({ ...customAction, name: e.target.value })}
-                    placeholder="e.g., Walked to Work"
-                    className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                  />
-                </div>
-
-                {/* Description Input */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
-                  <textarea
-                    value={customAction.description}
-                    onChange={(e) => setCustomAction({ ...customAction, description: e.target.value })}
-                    placeholder="Brief description of your action"
-                    rows={2}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none"
-                  />
-                </div>
-
-                {/* Category Select */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Category</label>
-                  <div className="flex flex-wrap gap-2">
-                    {CATEGORIES.filter((c) => c.id !== 'all').map((cat) => (
-                      <motion.button
-                        key={cat.id}
-                        onClick={() => setCustomAction({ ...customAction, category: cat.id as ActionCategory })}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`
-                          flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                          ${customAction.category === cat.id
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : 'bg-slate-700/30 text-slate-400 border border-transparent hover:bg-slate-700/50'
-                          }
-                        `}
-                      >
-                        <span>{cat.icon}</span>
-                        <span>{cat.label}</span>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Impact Metrics */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Estimated Impact (per action)
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs text-slate-400 mb-1">CO₂ Saved (kg)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        value={customAction.impactMetrics.co2Kg}
-                        onChange={(e) =>
-                          setCustomAction({
-                            ...customAction,
-                            impactMetrics: { ...customAction.impactMetrics, co2Kg: parseFloat(e.target.value) || 0 },
-                          })
-                        }
-                        className="w-full px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-white focus:border-emerald-500/50 focus:outline-none transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-slate-400 mb-1">Water Saved (L)</label>
-                      <input
-                        type="number"
-                        step="1"
-                        min="0"
-                        value={customAction.impactMetrics.waterLiters}
-                        onChange={(e) =>
-                          setCustomAction({
-                            ...customAction,
-                            impactMetrics: { ...customAction.impactMetrics, waterLiters: parseFloat(e.target.value) || 0 },
-                          })
-                        }
-                        className="w-full px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-white focus:border-emerald-500/50 focus:outline-none transition-all"
-                      />
-                    </div>
                   </div>
                 </div>
 
